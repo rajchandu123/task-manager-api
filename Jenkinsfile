@@ -20,5 +20,11 @@ pipeline {
                 bat 'npm test -- --runInBand'
             }
         }
+
+        stage('Docker Check') {
+            steps {
+                bat 'docker --version'
+            }
+        }
     }
 }
