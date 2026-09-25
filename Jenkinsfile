@@ -22,6 +22,10 @@ pipeline {
         }
 
         stage('Docker Build') {
+            environment {
+                DOCKER_HOST = 'npipe:////./pipe/dockerDesktopLinuxEngine'
+            }
+
             steps {
                 bat 'docker build -t task-manager-api:%BUILD_NUMBER% .'
             }
