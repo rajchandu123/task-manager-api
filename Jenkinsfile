@@ -21,9 +21,9 @@ pipeline {
             }
         }
 
-        stage('Docker Check') {
+        stage('Docker Build') {
             steps {
-                bat 'docker --version'
+                bat 'docker build -t task-manager-api:%BUILD_NUMBER% .'
             }
         }
     }
