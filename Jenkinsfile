@@ -45,9 +45,19 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                sshagent(['ec2-ssh-key']) {
+                withCredentials([
+                    sshUserPrivateKey(
+                        credentialsId: 'ec2-ssh-key',
+                        keyFileVariable: 'SSH_KEY',
+                        usernameVariable: 'EC2_USER'
+                    )
+                ]) {
                     bat '''
-                        ssh -o StrictHostKeyChecking=no ec2-user@ec2-16-171-12-29.eu-north-1.compute.amazonaws.com "docker pull chandankum123/task-manager-api:%BUILD_NUMBER% && docker stop task-manager-api || true && docker rm task-manager-api || true && docker run -d --name task-manager-api -p 3000:3000 chandankum123/task-manager-api:%BUILD_NUMBER%"
+                        icacls "%SSH_KEY%" /inheritance:r
+                        icacls "%SSH_KEY%" /grant:r "SYSTEM:(R)"
+                        icacls "%SSH_KEY%" /remove "BUILTIN\\Users"
+
+                        "C:\\Windows\\System32\\OpenSSH\\ssh.exe" -o StrictHostKeyChecking=no -i "%SSH_KEY%" %EC2_USER%@ec2-16-171-12-29.eu-north-1.compute.amazonaws.com "docker pull chandankum123/task-manager-api:%BUILD_NUMBER% && docker stop task-manager-api || true && docker rm task-manager-api || true && docker run -d --name task-manager-api -p 3000:3000 chandankum123/task-manager-api:%BUILD_NUMBER%"
                     '''
                 }
             }
