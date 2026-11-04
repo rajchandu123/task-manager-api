@@ -1,35 +1,24 @@
 const express = require("express");
+const path = require("path");
 
 const app = express();
 
 app.use(express.json());
 
+app.use(express.static(path.join(__dirname, "public")));
+
 const PORT = 3000;
 
-app.get("/", (req, res) => {
+app.get("/health", (req, res) => {
     res.json({
-        message: "Task Manager API is running!"
+        status: "healthy",
+        message: "ShopEase is running!"
     });
-});
-
-app.get("/tasks", (req, res) => {
-    res.json([
-        {
-            id: 1,
-            title: "Learn Jenkins",
-            completed: false
-        },
-        {
-            id: 2,
-            title: "Learn Docker",
-            completed: false
-        }
-    ]);
 });
 
 if (require.main === module) {
     app.listen(PORT, () => {
-        console.log(`Server running at http://localhost:${PORT}`);
+        console.log(`ShopEase running at http://localhost:${PORT}`);
     });
 }
 
