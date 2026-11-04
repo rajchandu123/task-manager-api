@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -35,8 +36,10 @@ pipeline {
                     )
                 ]) {
                     bat '''
-                        docker login -u "%DOCKER_USERNAME%" -p "%DOCKER_PASSWORD%"
+                        echo %DOCKER_PASSWORD%| docker login -u "%DOCKER_USERNAME%" --password-stdin
+
                         docker build -t %DOCKER_USERNAME%/task-manager-api:%BUILD_NUMBER% .
+
                         docker push %DOCKER_USERNAME%/task-manager-api:%BUILD_NUMBER%
                     '''
                 }
@@ -47,7 +50,7 @@ pipeline {
             steps {
                 withCredentials([
                     sshUserPrivateKey(
-                        credentialsId: 'ec2-ssh-key',
+                        credentialsId: 'ec2-ssh-key-new',
                         keyFileVariable: 'SSH_KEY',
                         usernameVariable: 'EC2_USER'
                     )
@@ -57,7 +60,7 @@ pipeline {
                         icacls "%SSH_KEY%" /grant:r "SYSTEM:(R)"
                         icacls "%SSH_KEY%" /remove "BUILTIN\\Users"
 
-                        "C:\\Windows\\System32\\OpenSSH\\ssh.exe" -o StrictHostKeyChecking=no -i "%SSH_KEY%" %EC2_USER%@ec2-16-171-12-29.eu-north-1.compute.amazonaws.com "docker pull chandankum123/task-manager-api:%BUILD_NUMBER% && docker stop task-manager-api || true && docker rm task-manager-api || true && docker run -d --name task-manager-api -p 3000:3000 chandankum123/task-manager-api:%BUILD_NUMBER%"
+                        "C:\\Windows\\System32\\OpenSSH\\ssh.exe" -o StrictHostKeyChecking=no -i "%SSH_KEY%" %EC2_USER%@77.114.14.26 "docker pull chandankum123/task-manager-api:%BUILD_NUMBER% && (docker stop task-manager-api || true) && (docker rm task-manager-api || true) && docker run -d --restart unless-stopped --name task-manager-api -p 3000:3000 chandankum123/task-manager-api:%BUILD_NUMBER%"
                     '''
                 }
             }
